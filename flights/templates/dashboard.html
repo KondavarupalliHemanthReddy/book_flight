@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard | AeroLux{% endblock %}
+
+{% block content %}
+<section id="dashboard" class="page-section p-6 md:p-10">
+    <div class="max-w-7xl mx-auto">
+        <h2 class="text-3xl font-bold text-gray-800 mb-8">User Dashboard</h2>
+        <div class="grid lg:grid-cols-4 gap-8">
+            <div class="lg:col-span-1">
+                <div class="card-custom p-6">
+                    <div class="flex flex-col items-center mb-6">
+                        <img src="https://placehold.co/120x120/E2E8F0/94A3B8?text={{ user.username|slice:':1'|upper }}" alt="User Avatar" class="w-24 h-24 rounded-full mb-4">
+                        <h3 class="text-xl font-semibold">{{ user.get_full_name|default:user.username }}</h3>
+                        <p class="text-sm text-gray-500">{{ user.email }}</p>
+                    </div>
+                    <nav class="space-y-2">
+                        <a href="#" class="dashboard-nav-item active flex items-center p-3 rounded-lg hover:bg-sky-100 text-sky-700 bg-sky-100" data-section="upcoming">
+                            <i data-lucide="calendar-check" class="mr-3 lucide-sm"></i> Upcoming Bookings
+                        </a>
+                        <a href="#" class="dashboard-nav-item flex items-center p-3 rounded-lg hover:bg-sky-100 text-gray-600" data-section="history">
+                            <i data-lucide="history" class="mr-3 lucide-sm"></i> Booking History
+                        </a>
+                        <a href="#" class="dashboard-nav-item flex items-center p-3 rounded-lg hover:bg-sky-100 text-gray-600" data-section="profile">
+                            <i data-lucide="user-cog" class="mr-3 lucide-sm"></i> Profile Settings
+                        </a>
+                        <a href="{% url 'logout' %}" class="dashboard-nav-item flex items-center p-3 rounded-lg hover:bg-red-100 text-red-600">
+                            <i data-lucide="log-out" class="mr-3 lucide-sm"></i> Logout
+                        </a>
+                    </nav>
+                </div>
+            </div>
+            
+            <div class="lg:col-span-3">
+                <!-- Upcoming Bookings -->
+                <div id="upcomingBookingsContent" class="dashboard-content card-custom p-6 md:p-8">
+                    <h3 class="text-2xl font-semibold mb-6">Upcoming Bookings</h3>
+                    {% if upcoming_bookings %}
+                    <div class="space-y-6">
+                        {% for booking in upcoming_bookings %}
+                        <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
+                                <div class="mb-4 md:mb-0">
+                                    <p class="text-lg font-semibold text-sky-700">
+                                        {{ booking.flight.origin.city }} ({{ booking.flight.origin.code }}) 
+                                        <i data-lucide="arrow-right" class="inline-block lucide-sm"></i> 
+                                        {{ booking.flight.destination.city }} ({{ booking.flight.destination.code }})
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        Flight {{ booking.flight.flight_number }} | {{ booking.flight.departure_time|date:"M d, Y - h:i A" }}
+                                    </p>
+                                    <p class="text-sm text-gray-600 mt-2">
+                                        <strong>Passenger:</strong> {{ booking.passenger_first_name }} {{ booking.passenger_last_name }} | 
+                                        <strong>Seat:</strong> {{ booking.seat.seat_number }}
+                                    </p>
+                                </div>
+                                <span class="text-sm bg-green-100 text-green-700 px-3 py-1 rounded-full font-medium">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="btn-custom btn-secondary-custom !px-3 !py-1 !text-sm" onclick="viewBooking({{booking.id}})">
+                                    <i data-lucide="eye" class="inline-block mr-1 lucide-sm"></i> View Details
+                                </button>
+                                <a href="{% url 'cancel_booking' booking.id %}" class="btn-custom btn-secondary-custom !px-3 !py-1 !text-sm text-red-600 hover:bg-red-50" onclick="return confirm('Are you sure you want to cancel this booking?')">
+                                    <i data-lucide="x-circle" class="inline-block mr-1 lucide-sm"></i> Cancel Booking
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <i data-lucide="calendar-x" class="lucide-lg text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-600 mb-4">No upcoming bookings found.</p>
+                        <a href="{% url 'search_flights' %}" class="btn-custom btn-primary-custom">Search Flights</a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Booking History -->
+                <div id="bookingHistoryContent" class="dashboard-content card-custom p-6 md:p-8 hidden">
+                    <h3 class="text-2xl font-semibold mb-6">Booking History</h3>
+                    {% if past_bookings %}
+                    <div class="space-y-4">
+                        {% for booking in past_bookings %}
+                        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <p class="text-lg font-semibold text-gray-700">
+                                        {{ booking.flight.origin.city }} ({{ booking.flight.origin.code }}) 
+                                        <i data-lucide="arrow-right" class="inline-block lucide-sm"></i> 
+                                        {{ booking.flight.destination.city }} ({{ booking.flight.destination.code }})
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        Flight {{ booking.flight.flight_number }} | {{ booking.flight.departure_time|date:"M d, Y" }}
+                                    </p>
+                                    <p class="text-sm text-gray-600 mt-1">
+                                        Booking ID: #{{ booking.id }} | Total: ${{ booking.total_price }}
+                                    </p>
+                                </div>
+                                <span class="text-sm {% if booking.status == 'confirmed' %}bg-blue-100 text-blue-700{% elif booking.status == 'cancelled' %}bg-red-100 text-red-700{% else %}bg-gray-100 text-gray-700{% endif %} px-3 py-1 rounded-full font-medium">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <i data-lucide="history" class="lucide-lg text-gray-400 mx-auto mb-4"></i>
+                        <p class="text-gray-600">No past bookings found.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Profile Settings -->
+                <div id="profileSettingsContent" class="dashboard-content card-custom p-6 md:p-8 hidden">
+                    <h3 class="text-2xl font-semibold mb-6">Profile Settings</h3>
+                    <form method="post" class="space-y-6">
+                        {% csrf_token %}
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="form-label-custom">Username</label>
+                                <input type="text" value="{{ user.username }}" class="input-field-custom" readonly>
+                            </div>
+                            <div>
+                                <label class="form-label-custom">Email</label>
+                                <input type="email" value="{{ user.email }}" class="input-field-custom" readonly>
+                            </div>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="form-label-custom">First Name</label>
+                                <input type="text" value="{{ user.first_name }}" class="input-field-custom" name="first_name">
+                            </div>
+                            <div>
+                                <label class="form-label-custom">Last Name</label>
+                                <input type="text" value="{{ user.last_name }}" class="input-field-custom" name="last_name">
+                            </div>
+                        </div>
+                        <div class="border-t pt-6">
+                            <h4 class="text-lg font-semibold mb-4">Account Statistics</h4>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="bg-sky-50 p-4 rounded-lg">
+                                    <p class="text-sm text-gray-600">Total Bookings</p>
+                                    <p class="text-2xl font-bold text-sky-700">{{ upcoming_bookings|length|add:past_bookings|length }}</p>
+                                </div>
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <p class="text-sm text-gray-600">Upcoming Trips</p>
+                                    <p class="text-2xl font-bold text-green-700">{{ upcoming_bookings|length }}</p>
+                                </div>
+                                <div class="bg-purple-50 p-4 rounded-lg">
+                                    <p class="text-sm text-gray-600">Member Since</p>
+                                    <p class="text-lg font-bold text-purple-700">{{ user.date_joined|date:"M Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-custom btn-primary-custom">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        
+        const dashboardNavItems = document.querySelectorAll('.dashboard-nav-item[data-section]');
+        const dashboardContents = document.querySelectorAll('.dashboard-content');
+        
+        dashboardNavItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetSection = item.dataset.section;
+                
+                // Update active state
+                dashboardNavItems.forEach(nav => {
+                    nav.classList.remove('bg-sky-100', 'text-sky-700');
+                    nav.classList.add('text-gray-600');
+                });
+                item.classList.add('bg-sky-100', 'text-sky-700');
+                item.classList.remove('text-gray-600');
+                
+                // Show target content
+                dashboardContents.forEach(content => {
+                    content.classList.add('hidden');
+                });
+                
+                const targetId = targetSection === 'upcoming' ? 'upcomingBookingsContent' : 
+                                targetSection === 'history' ? 'bookingHistoryContent' : 
+                                'profileSettingsContent';
+                                
+                document.getElementById(targetId).classList.remove('hidden');
+                lucide.createIcons();
+            });
+        });
+    });
+    
+    function viewBooking(bookingId) {
+        alert('Booking details view - Implementation needed for booking #' + bookingId);
+    }
+</script>
+{% endblock %}

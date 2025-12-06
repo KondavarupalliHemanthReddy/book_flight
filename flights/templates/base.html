@@ -1,0 +1,159 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AeroLux | Airline Reservation System{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <!-- <link rel="stylesheet" href="static/style.css"> -->
+     <link rel="stylesheet" href="{% static 'style.css' %}">
+
+</head>
+<body class="text-gray-800">
+
+    <nav class="bg-sky-800 shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center">
+                    <a href="{% url 'home' %}" class="flex-shrink-0 text-white text-2xl font-bold flex items-center">
+                        <i data-lucide="plane" class="mr-2"></i>
+                        AeroLux
+                    </a>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="{% url 'home' %}" class="nav-link-custom {% if page == 'home' %}nav-link-active-custom{% endif %}" >Home</a>
+                        <a href="{% url 'search_flights' %}" class="nav-link-custom {% if page == 'searchResults' %}nav-link-active-custom{% endif %}" >Flights</a>
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="nav-link-custom {% if page == 'dashboard' %}nav-link-active-custom{% endif %}">Dashboard</a>
+                        {% if user.is_staff %}
+                        <a href="{% url 'admin:index' %}" class="nav-link-custom">Admin</a> 
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-4 flex items-center md:ml-6">
+                        {% if user.is_authenticated %}
+                        <div class="ml-3 relative" id="userProfileDropdownContainer">
+                            <div>
+                                <button type="button" class="max-w-xs bg-sky-700 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-sky-800 focus:ring-white" id="user-menu-button" aria-expanded="false" aria-haspopup="true">
+                                    <span class="sr-only">Open user menu</span>
+                                    <img class="h-10 w-10 rounded-full" src="https://placehold.co/100x100/E2E8F0/94A3B8?text={{ user.username|slice:':1'|upper }}" alt="User Profile">
+                                </button>
+                            </div>
+                            <div id="userProfileDropdown" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none hidden" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
+                                <a href="{% url 'dashboard' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Your Profile</a>
+                                <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Sign out</a>
+                            </div>
+                        </div>
+                        {% else %}
+                        <a href="/login" class="nav-link-custom flex items-center">
+                            <i data-lucide="log-in" class="mr-1 lucide-sm"></i> Login
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" id="mobileMenuButton" class="bg-sky-700 inline-flex items-center justify-center p-2 rounded-md text-gray-300 hover:text-white hover:bg-sky-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white" aria-controls="mobile-menu" aria-expanded="false">
+                        <span class="sr-only">Open main menu</span>
+                        <i data-lucide="menu" class="block h-6 w-6 current-icon"></i>
+                        <i data-lucide="x" class="hidden h-6 w-6 current-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="md:hidden hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="{% url 'home' %}" class="nav-link-custom block {% if page == 'home' %}nav-link-active-custom{% endif %}">Home</a>
+                <a href="{% url 'search_flights' %}" class="nav-link-custom block {% if page == 'searchResults' %}nav-link-active-custom{% endif %}">Flights</a>
+                {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="nav-link-custom block {% if page == 'dashboard' %}nav-link-active-custom{% endif %}">Dashboard</a>
+                {% endif %}
+            </div>
+            <div class="pt-4 pb-3 border-t border-sky-700">
+                <div class="flex items-center px-5">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}" class="w-full text-left nav-link-custom flex items-center">
+                        <i data-lucide="log-out" class="mr-1 lucide-sm"></i> Logout
+                    </a>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="w-full text-left nav-link-custom flex items-center">
+                        <i data-lucide="log-in" class="mr-1 lucide-sm"></i> Login
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main id="mainContent" class="pb-16">
+        {% if messages %}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+            {% for message in messages %}
+            <div class="bg-{% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% elif message.tags == 'warning' %}yellow{% else %}blue{% endif %}-100 border border-{% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% elif message.tags == 'warning' %}yellow{% else %}blue{% endif %}-400 text-{% if message.tags == 'error' %}red{% elif message.tags == 'success' %}green{% elif message.tags == 'warning' %}yellow{% else %}blue{% endif %}-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-gray-800 text-gray-300 py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">AeroLux</h3>
+                    <p class="text-sm">Your journey, our passion. Experience seamless travel with AeroLux.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="{% url 'home' %}" class="hover:text-sky-400 transition-colors">Home</a></li>
+                        <li><a href="{% url 'search_flights' %}" class="hover:text-sky-400 transition-colors">Search Flights</a></li>
+                        <li><a href="#" class="hover:text-sky-400 transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-sky-400 transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-white mb-4">Newsletter</h3>
+                    <p class="text-sm mb-3">Subscribe for exclusive deals and updates.</p>
+                    <form class="flex">
+                        <input type="email" placeholder="Your email" class="input-field-custom !rounded-r-none !py-2 text-gray-800">
+                        <button type="submit" class="btn-custom btn-primary-custom !rounded-l-none !py-2 !px-4">Subscribe</button>
+                    </form>
+                    <div class="mt-6 flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-sky-400"><i data-lucide="facebook" class="lucide-sm"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-sky-400"><i data-lucide="twitter" class="lucide-sm"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-sky-400"><i data-lucide="instagram" class="lucide-sm"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-10 border-t border-gray-700 pt-8 text-center text-sm">
+                <p>&copy; <span id="currentYear"></span> AeroLux. All rights reserved. Designed with TailwindCSS.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div id="toastNotification" class="toast-custom">
+        <span id="toastMessage"></span>
+    </div>
+    
+    <script src="{% static 'script.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            const currentYearEl = document.getElementById('currentYear');
+            if (currentYearEl) {
+                currentYearEl.textContent = new Date().getFullYear();
+            }
+        });
+    </script>
+</body>
+</html>

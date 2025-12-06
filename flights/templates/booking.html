@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Booking | AeroLux{% endblock %}
+
+{% block content %}
+<section id="booking" class="page-section p-6 md:p-10">
+    <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl font-bold text-gray-800 mb-8">Complete Your Booking</h2>
+        <form method="post" id="bookingForm">
+            {% csrf_token %}
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="card-custom p-6 md:p-8">
+                        <h3 class="text-xl font-semibold mb-6">Passenger Details</h3>
+                        <div class="space-y-6">
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="firstName" class="form-label-custom">First Name</label>
+                                    {{ form.passenger_first_name }}
+                                    {% if form.passenger_first_name.errors %}
+                                    <p class="text-red-500 text-sm mt-1">{{ form.passenger_first_name.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <label for="lastName" class="form-label-custom">Last Name</label>
+                                    {{ form.passenger_last_name }}
+                                    {% if form.passenger_last_name.errors %}
+                                    <p class="text-red-500 text-sm mt-1">{{ form.passenger_last_name.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div>
+                                <label for="email" class="form-label-custom">Email Address</label>
+                                {{ form.passenger_email }}
+                                {% if form.passenger_email.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.passenger_email.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label for="phone" class="form-label-custom">Phone Number</label>
+                                {{ form.passenger_phone }}
+                                {% if form.passenger_phone.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.passenger_phone.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-custom p-6 md:p-8">
+                        <h3 class="text-xl font-semibold mb-6">Select Your Seat</h3>
+                        <div class="bg-gray-100 p-4 rounded-lg mb-4 text-center text-sm text-gray-600">
+                            <i data-lucide="screen-share" class="inline-block mr-2 lucide-sm"></i> Airplane Screen
+                        </div>
+                        <div class="overflow-x-auto">
+                            <div id="seatMapContainer" class="grid grid-cols-10 gap-1 md:gap-2 mx-auto w-max p-2 md:p-4 bg-white rounded-lg shadow-inner">
+    {% for row_letter in "ABCDEFGHIJ" %} {# rows A-J #}
+        <div class="flex space-x-1 mb-1">
+            {% for seat in seats %}
+                {% if seat.seat_number|slice:":1" == row_letter %}
+                    <div class="seat-base seat-{{ seat.status }} w-8 h-8 cursor-pointer" 
+                         data-seat="{{ seat.seat_number }}" 
+                         data-status="{{ seat.status }}">
+                        {{ seat.seat_number|slice:"1:" }} {# shows column number #}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+                        </div>
+                        <div class="flex justify-center space-x-4 mt-6 text-sm">
+                            <div class="flex items-center"><div class="w-4 h-4 seat-available rounded mr-2"></div> Available</div>
+                            <div class="flex items-center"><div class="w-4 h-4 seat-selected rounded mr-2"></div> Selected</div>
+                            <div class="flex items-center"><div class="w-4 h-4 seat-occupied rounded mr-2"></div> Occupied</div>
+                        </div>
+                        <input type="hidden" name="seat_number" id="selectedSeatInput" required>
+                        <div id="seatError" class="text-red-500 text-sm mt-2 hidden">Please select a seat</div>
+                    </div>
+                </div>
+
+                <aside class="lg:col-span-1">
+                    <div class="card-custom p-6 md:p-8 sticky top-24">
+                        <h3 class="text-xl font-semibold mb-6 border-b pb-3">Booking Summary</h3>
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Flight:</span>
+                                <span class="font-medium">{{ flight.flight_number }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Route:</span>
+                                <span class="font-medium">{{ flight.origin.code }} <i data-lucide="arrow-right" class="inline-block lucide-sm"></i> {{ flight.destination.code }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Airline:</span>
+                                <span class="font-medium">{{ flight.airline.name }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Date:</span>
+                                <span class="font-medium">{{ flight.departure_time|date:"M d, Y" }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Departure:</span>
+                                <span class="font-medium">{{ flight.departure_time|date:"h:i A" }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Arrival:</span>
+                                <span class="font-medium">{{ flight.arrival_time|date:"h:i A" }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Duration:</span>
+                                <span class="font-medium">{{ flight.duration }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Selected Seat:</span>
+                                <span class="font-medium" id="selectedSeatDisplay">None</span>
+                            </div>
+                        </div>
+                        <div class="border-t pt-4 space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Base Fare:</span>
+                                <span class="font-medium">${{ flight.base_price }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Taxes & Fees:</span>
+                                <span class="font-medium">$45.50</span>
+                            </div>
+                            <div class="flex justify-between text-xl font-bold text-sky-700">
+                                <span>Total:</span>
+                                <span>${{ flight.base_price|add:"45.50" }}</span>
+                            </div>
+                        </div>
+                        <button type="submit" id="confirmBookingButton" class="btn-custom btn-primary-custom w-full mt-8">
+                            <i data-lucide="check-circle" class="inline-block mr-1 lucide-sm"></i> Confirm & Pay
+                        </button>
+                    </div>
+                </aside>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+        
+        const seatMapContainer = document.getElementById('seatMapContainer');
+        const selectedSeatDisplay = document.getElementById('selectedSeatDisplay');
+        const selectedSeatInput = document.getElementById('selectedSeatInput');
+        const seatError = document.getElementById('seatError');
+        const bookingForm = document.getElementById('bookingForm');
+        
+        if (seatMapContainer && selectedSeatDisplay && selectedSeatInput) {
+            seatMapContainer.addEventListener('click', (e) => {
+                const seat = e.target.closest('.seat-base');
+                if (seat && seat.dataset.status === 'available') {
+                    // Remove previous selection
+                    const currentSelected = seatMapContainer.querySelector('.seat-selected');
+                    if (currentSelected && currentSelected !== seat) {
+                        currentSelected.classList.remove('seat-selected');
+                        currentSelected.classList.add('seat-available');
+                    }
+                    
+                    // Toggle current seat
+                    if (seat.classList.contains('seat-selected')) {
+                        seat.classList.remove('seat-selected');
+                        seat.classList.add('seat-available');
+                        selectedSeatDisplay.textContent = 'None';
+                        selectedSeatInput.value = '';
+                    } else {
+                        seat.classList.remove('seat-available');
+                        seat.classList.add('seat-selected');
+                        selectedSeatDisplay.textContent = seat.dataset.seat;
+                        selectedSeatInput.value = seat.dataset.seat;
+                        seatError.classList.add('hidden');
+                    }
+                    lucide.createIcons();
+                }
+            });
+        }
+        
+        // Form validation
+        if (bookingForm) {
+            bookingForm.addEventListener('submit', (e) => {
+                if (!selectedSeatInput.value) {
+                    e.preventDefault();
+                    seatError.classList.remove('hidden');
+                    seatMapContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

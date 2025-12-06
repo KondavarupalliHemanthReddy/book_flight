@@ -1,0 +1,105 @@
+[
+  {
+    "model": "flights.airline",
+    "pk": 1,
+    "fields": {
+      "name": "IndiFly",
+      "code": "IF"
+    }
+  },
+  {
+    "model": "flights.airline",
+    "pk": 2,
+    "fields": {
+      "name": "AirIndia Express",
+      "code": "AI"
+    }
+  },
+
+  {
+    "model": "flights.airport",
+    "pk": 1,
+    "fields": {
+      "name": "Chhatrapati Shivaji International Airport",
+      "city": "Mumbai",
+      "country": "India",
+      "code": "BOM"
+    }
+  },
+  {
+    "model": "flights.airport",
+    "pk": 2,
+    "fields": {
+      "name": "Rajiv Gandhi International Airport",
+      "city": "Hyderabad",
+      "country": "India",
+      "code": "HYD"
+    }
+  },
+  {
+    "model": "flights.airport",
+    "pk": 3,
+    "fields": {
+      "name": "Kempegowda International Airport",
+      "city": "Bangalore",
+      "country": "India",
+      "code": "BLR"
+    }
+  },
+  {
+    "model": "flights.airport",
+    "pk": 4,
+    "fields": {
+      "name": "Visakhapatnam Airport",
+      "city": "Vishakapatnam",
+      "country": "India",
+      "code": "VTZ"
+    }
+  },
+
+  {
+    "model": "flights.flight",
+    "pk": 1,
+    "fields": {
+      "airline": 1,
+      "flight_number": "IF101",
+      "origin": 1,
+      "destination": 2,
+      "departure_time": "2025-12-04T08:00:00Z",
+      "arrival_time": "2025-12-04T10:00:00Z",
+      "base_price": "350.00",
+      "total_seats": 10,
+      "available_seats": 10
+    }
+  },
+  {
+    "model": "flights.flight",
+    "pk": 2,
+    "fields": {
+      "airline": 2,
+      "flight_number": "AI202",
+      "origin": 2,
+      "destination": 3,
+      "departure_time": "2025-12-05T07:00:00Z",
+      "arrival_time": "2025-12-05T09:00:00Z",
+      "base_price": "420.00",
+      "total_seats": 12,
+      "available_seats": 12
+    }
+  },
+  {
+    "model": "flights.flight",
+    "pk": 3,
+    "fields": {
+      "airline": 1,
+      "flight_number": "IF303",
+      "origin": 3,
+      "destination": 4,
+      "departure_time": "2025-12-06T11:00:00Z",
+      "arrival_time": "2025-12-06T13:00:00Z",
+      "base_price": "380.00",
+      "total_seats": 8,
+      "available_seats": 8
+    }
+  }
+]

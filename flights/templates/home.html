@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home | AeroLux Airline Reservation System{% endblock %}
+
+{% block content %}
+<section id="home" class="page-section">
+    <div class="gradient-hero text-white py-20 md:py-32" style="background-image: url(https://raw.githubusercontent.com/farazc60/Project-Images/refs/heads/main/aerolux-hero-section.webp); background-size: cover;">
+        <div class="max-w-xl px-4 sm:px-6 lg:px-8 text-gray-900">
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-6">
+                Discover Your Next Adventure
+            </h1>
+            <p class="text-lg sm:text-xl md:text-2xl mb-10">
+                Book flights to your dream destinations with AeroLux. Seamless, secure, and swift.
+            </p>
+        </div>
+    </div>
+    
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 md:-mt-24">
+        <div class="card-custom p-6 md:p-10">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">Search Flights</h2>
+            <form method="get" action="{% url 'search_flights' %}" id="flightSearchForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end" style="background-color:white;">
+                <div>
+                    <label for="from" class="form-label-custom">From</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="map-pin" class="text-gray-400 lucide-sm"></i>
+                        </div>
+                        {{ form.origin }}
+                    </div>
+                </div>
+                <div>
+                    <label for="to" class="form-label-custom">To</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="map-pin" class="text-gray-400 lucide-sm"></i>
+                        </div>
+                        {{ form.destination }}
+                    </div>
+                </div>
+                <div>
+                    <label for="date" class="form-label-custom">Departure Date</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-lucide="calendar-days" class="text-gray-400 lucide-sm"></i>
+                        </div>
+                        {{ form.departure_date }}
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="passengers" class="form-label-custom">Passengers</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i data-lucide="users" class="text-gray-400 lucide-sm"></i>
+                            </div>
+                            {{ form.passengers }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-custom btn-primary-custom w-full h-full mt-auto self-end py-[13px]">
+                        <i data-lucide="search" class="inline-block mr-1 lucide-sm"></i> Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+        <h3 class="text-3xl font-bold text-gray-800 mb-8 text-center">Why Choose AeroLux?</h3>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="card-custom p-6 text-center hover:shadow-xl transition-shadow">
+                <i data-lucide="award" class="lucide-lg text-sky-600 mx-auto mb-4"></i>
+                <h4 class="text-xl font-semibold mb-2">Best Price Guarantee</h4>
+                <p class="text-gray-600">Find the most competitive fares for your journey.</p>
+            </div>
+            <div class="card-custom p-6 text-center hover:shadow-xl transition-shadow">
+                <i data-lucide="shield-check" class="lucide-lg text-sky-600 mx-auto mb-4"></i>
+                <h4 class="text-xl font-semibold mb-2">Secure Booking</h4>
+                <p class="text-gray-600">Your data is safe with our advanced security measures.</p>
+            </div>
+            <div class="card-custom p-6 text-center hover:shadow-xl transition-shadow">
+                <i data-lucide="headphones" class="lucide-lg text-sky-600 mx-auto mb-4"></i>
+                <h4 class="text-xl font-semibold mb-2">24/7 Support</h4>
+                <p class="text-gray-600">Our team is always here to help you with any queries.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        lucide.createIcons();
+    });
+</script>
+{% endblock %}
